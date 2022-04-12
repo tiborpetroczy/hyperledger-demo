@@ -1,0 +1,112 @@
+# PACKAGE ONLY ONCE
+cd /opt/gopath/src/github.com/chaincode/sacc
+GO111MODULE=on go mod vendor
+cd ~
+peer lifecycle chaincode package sacc.tar.gz --path /opt/gopath/src/github.com/chaincode/sacc/ --lang golang --label sacc_1.0
+
+peer lifecycle chaincode install sacc.tar.gz
+
+peer lifecycle chaincode queryinstalled
+CC_PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "Package ID" | cut -d',' -f1 | cut -d' ' -f3)
+
+peer lifecycle chaincode approveformyorg -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA --channelID demochannel --name sacc --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1
+
+
+# INSTALL AND APPROVE IN NEXT ORG FIRST PEER PEER0.ORG2
+CORE_PEER_ADDRESS=peer0.org2.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org2MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/users/Admin@org2.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt
+
+peer lifecycle chaincode install sacc.tar.gz
+peer lifecycle chaincode queryinstalled
+CC_PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "Package ID" | cut -d',' -f1 | cut -d' ' -f3)
+peer lifecycle chaincode approveformyorg -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA --channelID demochannel --name sacc --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1
+
+peer lifecycle chaincode checkcommitreadiness --channelID demochannel --name sacc --version 1.0 --sequence 1 --output json
+
+
+# INSTALL AND APPROVE IN NEXT ORG FIRST PEER PEER0.ORG3
+CORE_PEER_ADDRESS=peer0.org3.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org3MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/users/Admin@org3.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/ca.crt
+
+peer lifecycle chaincode install sacc.tar.gz
+peer lifecycle chaincode queryinstalled
+CC_PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "Package ID" | cut -d',' -f1 | cut -d' ' -f3)
+peer lifecycle chaincode approveformyorg -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA --channelID demochannel --name sacc --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1
+
+peer lifecycle chaincode checkcommitreadiness --channelID demochannel --name sacc --version 1.0 --sequence 1 --output json
+
+
+# CHAINCODE COMMIT WITH 3 PEERS (peer0.org1 + peer0.org2 + peer0.org3) AS ORG ADMIN
+CORE_PEER_ADDRESS=peer0.org1.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org1MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/users/Admin@org1.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/ca.crt
+
+peer lifecycle chaincode commit -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA --channelID demochannel \
+    --name sacc --version 1.0 --sequence 1 \
+    --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
+    --peerAddresses peer0.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt \
+    --peerAddresses peer0.org3.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/ca.crt
+
+
+peer lifecycle chaincode querycommitted --channelID demochannel --name sacc
+
+
+# METHOD ON NEXT PEER - PEER1.ORG1
+CORE_PEER_ADDRESS=peer1.org1.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org1MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/users/Admin@org1.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt
+
+peer lifecycle chaincode install sacc.tar.gz
+
+peer lifecycle chaincode queryinstalled
+CC_PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "Package ID" | cut -d',' -f1 | cut -d' ' -f3)
+
+CORE_PEER_ADDRESS=peer1.org2.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org2MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/users/Admin@org2.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls/ca.crt
+
+
+CORE_PEER_ADDRESS=peer1.org3.netbuild.hu:7051
+CORE_PEER_LOCALMSPID=Org3MSP
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/users/Admin@org3.netbuild.hu/msp
+CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls/server.crt
+CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls/server.key
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls/ca.crt
+peer lifecycle chaincode install sacc.tar.gz
+
+# INVOKE CHAINCODE
+peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA -C demochannel -n sacc \
+--peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
+--peerAddresses peer1.org1.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt \
+--peerAddresses peer0.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt \
+--peerAddresses peer1.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls/ca.crt \
+--peerAddresses peer0.org3.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/ca.crt \
+--peerAddresses peer1.org3.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls/ca.crt \
+-c '{"function":"set","args":["key1","value1"]}' --waitForEvent
+
+# QUERY CHAINCODE
+peer chaincode query -C demochannel -n sacc --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE -c '{"function":"get","args":["key1"]}'
+
+
+peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA -C demochannel -n sacc \
+--peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
+--peerAddresses peer1.org1.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt \
+--peerAddresses peer0.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt \
+-c '{"function":"set","args":["car1","merci"]}' --waitForEvent

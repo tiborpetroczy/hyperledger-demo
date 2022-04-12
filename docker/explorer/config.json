@@ -1,0 +1,10 @@
+{
+	"network-configs": {
+		"demonetwork": {
+			"name": "demo-network",
+			"profile": "./connection-profile/demo.json"
+		}
+	},
+        "configtxgenToolPath":"/usr/local/bin",
+	"license": "Apache-2.0"
+}

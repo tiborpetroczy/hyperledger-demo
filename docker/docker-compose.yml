@@ -1,0 +1,533 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  basic:
+
+services:
+  couchdbOrg1Peer0:
+    container_name: couchdbOrg1Peer0
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org1peer0
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 5984:5984
+    networks:
+      - basic
+
+  couchdbOrg1Peer1:
+    container_name: couchdbOrg1Peer1
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org1peer1
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 6984:5984
+    networks:
+      - basic
+
+  couchdbOrg2Peer0:
+    container_name: couchdbOrg2Peer0
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org2peer0
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 7984:5984
+    networks:
+      - basic
+
+  couchdbOrg2Peer1:
+    container_name: couchdbOrg2Peer1
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org2peer1
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 8984:5984
+    networks:
+      - basic
+
+  couchdbOrg3Peer0:
+    container_name: couchdbOrg3Peer0
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org3peer0
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 9984:5984
+    networks:
+      - basic
+
+  couchdbOrg3Peer1:
+    container_name: couchdbOrg3Peer1
+    image: hyperledger/fabric-couchdb:$COUCHDB_IMAGE_TAG
+    environment:
+      - COUCHDB_USER=org3peer1
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 10984:5984
+    networks:
+      - basic
+
+  ca.org1.netbuild.hu:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.netbuild.hu
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.netbuild.hu-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/priv_sk
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.netbuild.hu/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.org1.netbuild.hu
+    networks:
+      - basic
+
+  ca.org2.netbuild.hu:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca2.netbuild.hu
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.netbuild.hu-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/priv_sk
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ./crypto-config/peerOrganizations/org2.netbuild.hu/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.org2.netbuild.hu
+    networks:
+      - basic
+
+  ca.org3.netbuild.hu:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca3.netbuild.hu
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org3.netbuild.hu-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/priv_sk
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ./crypto-config/peerOrganizations/org3.netbuild.hu/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.org3.netbuild.hu
+    networks:
+      - basic
+
+  orderer.netbuild.hu:
+    container_name: orderer.netbuild.hu
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=info
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_METRICS_PROVIDER=prometheus
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 7050:7050
+      - 8443:8443
+    volumes:
+      - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer.netbuild.hu/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer.netbuild.hu/tls/:/var/hyperledger/orderer/tls
+    networks:
+      - basic
+
+  orderer2.netbuild.hu:
+    container_name: orderer2.netbuild.hu
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=info    
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_METRICS_PROVIDER=prometheus
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443      
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 8050:7050
+      - 9443:8443
+    volumes:
+      - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer2.netbuild.hu/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer2.netbuild.hu/tls/:/var/hyperledger/orderer/tls
+    networks:
+      - basic
+
+  orderer3.netbuild.hu:
+    container_name: orderer3.netbuild.hu
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=info    
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_METRICS_PROVIDER=prometheus
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443      
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 9050:7050
+      - 10443:8443
+    volumes:
+      - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer3.netbuild.hu/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer3.netbuild.hu/tls/:/var/hyperledger/orderer/tls
+    networks:
+      - basic
+
+  peer0.org1.netbuild.hu:
+    container_name: peer0.org1.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org1.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer0.org1.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg1Peer0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org1peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password      
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg1Peer0
+    networks:
+      - basic
+
+  peer1.org1.netbuild.hu:
+    container_name: peer1.org1.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org1.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer1.org1.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg1Peer1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org1peer1
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password      
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 8051:7051
+      - 8053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg1Peer1
+    networks:
+      - basic
+
+  peer0.org2.netbuild.hu:
+    container_name: peer0.org2.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org2.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer0.org2.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg2Peer0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org2peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 9051:7051
+      - 9053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg2Peer0  
+    networks:
+      - basic
+
+  peer1.org2.netbuild.hu:
+    container_name: peer1.org2.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org2.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_ADDRESS=peer1.org2.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg2Peer1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org2peer1
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password  
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 10051:7051
+      - 10053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg2Peer1  
+    networks:
+      - basic
+
+  peer0.org3.netbuild.hu:
+    container_name: peer0.org3.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org3.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_ADDRESS=peer0.org3.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg3Peer0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org3peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 11051:7051
+      - 11053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg3Peer0  
+    networks:
+      - basic
+
+  peer1.org3.netbuild.hu:
+    container_name: peer1.org3.netbuild.hu
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.org3.netbuild.hu
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_ADDRESS=peer1.org3.netbuild.hu:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbOrg3Peer1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=org3peer1
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password  
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+    ports:
+      - 12051:7051
+      - 12053:7053
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls:/etc/hyperledger/fabric/tls
+    depends_on:
+      - orderer.netbuild.hu
+      - couchdbOrg3Peer1  
+    networks:
+      - basic
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.netbuild.hu:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/users/Admin@org1.netbuild.hu/msp
+      - ORDERER_TLS_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/netbuild.hu/orderers/orderer.netbuild.hu/msp/tlscacerts/tlsca.netbuild.hu-cert.pem
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../fabric-samples/chaincode/:/opt/gopath/src/github.com/chaincode
+      - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+      - ./config:/etc/hyperledger/configtx
+    networks:
+        - basic
+    depends_on:
+      - orderer.netbuild.hu
+      - orderer2.netbuild.hu
+      - orderer3.netbuild.hu
+      - peer0.org1.netbuild.hu
+      - peer0.org2.netbuild.hu
+  
+  explorer:
+    image: hyperledger/explorer:$EXPLORER_IMAGE_TAG
+    container_name: explorer
+    hostname: explorer
+    environment:
+      - DATABASE_HOST=explorerdb
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=admin
+      - DATABASE_PASSWD=password
+      - LOG_LEVEL_APP=debug
+      - LOG_LEVEL_DB=debug
+      - LOG_LEVEL_CONSOLE=debug
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVER_AS_LOCALHOST=false
+    volumes:
+      - ./explorer/config.json:/opt/explorer/app/platform/fabric/config.json
+      - ./explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile/
+      - ./crypto-config/:/tmp/crypto/
+    ports:
+      - 8080:8080
+    networks:
+      - basic
+  
+  explorerdb:
+    container_name: explorerdb
+    image: hyperledger/explorer-db:$EXPLORER_DB_IMAGE_TAG
+    hostname: explorerdb
+    environment:
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=admin
+      - DATABASE_PASSWORD=password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - basic
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:$PROMETHEUS_IMAGE_TAG
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      - basic
+  
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:$GRAFANA_IMAGE_TAG
+    ports:
+      - 3000:3000
+    networks:
+      - basic
+  
+  fluentd:
+    container_name: fluentd
+    #image: fluentd:$FLUENTD_IMAGE_TAG
+    image: dvladnik/fluentd-ui:latest
+    ports:
+      - 24224:24224
+      - 9292:9292
+    volumes:
+      - ./fluentd/log:/fluentd/log
+      - ./fluentd/:/fluentd/etc
+    environment:
+      FLUENTD_CONF: fluentd.conf    

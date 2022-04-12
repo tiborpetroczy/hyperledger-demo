@@ -1,0 +1,112 @@
+{
+	"name": "demo-network",
+	"version": "1.0.0",
+	"client": {
+		"tlsEnable": true,
+		"adminCredential": {
+			"id": "admin",
+			"password": "password"
+		},
+		"enableAuthentication": true,
+		"organization": "Org1MSP",
+		"connection": {
+			"timeout": {
+				"peer": {
+					"endorser": "300"
+				},
+				"orderer": "300"
+			}
+		}
+	},
+	"channels": {
+		"demochannel": {
+			"peers": {
+				"peer0.org1.netbuild.hu": {},
+                "peer1.org1.netbuild.hu": {},
+                "peer0.org2.netbuild.hu": {},
+                "peer1.org2.netbuild.hu": {},
+                "peer0.org3.netbuild.hu": {},
+                "peer1.org3.netbuild.hu": {}
+			},
+			"connection": {
+				"timeout": {
+					"peer": {
+						"endorser": "6000",
+						"eventHub": "6000",
+						"eventReg": "6000"
+					}
+				}
+			}
+		}
+		},
+	"organizations": {
+		"Org1MSP": {
+			"mspid": "Org1MSP",
+			"adminPrivateKey": {
+				"path": "/tmp/crypto/peerOrganizations/org1.netbuild.hu/users/Admin@org1.netbuild.hu/msp/keystore/priv_sk"
+			},
+			"peers": ["peer0.org1.netbuild.hu","peer1.org1.netbuild.hu"],
+			"signedCert": {
+				"path": "/tmp/crypto/peerOrganizations/org1.netbuild.hu/users/Admin@org1.netbuild.hu/msp/signcerts/Admin@org1.netbuild.hu-cert.pem"
+			}
+		},
+		"Org2MSP": {
+			"mspid": "Org2MSP",
+			"adminPrivateKey": {
+				"path": "/tmp/crypto/peerOrganizations/org2.netbuild.hu/users/Admin@org2.netbuild.hu/msp/keystore/priv_sk"
+			},
+			"peers": ["peer0.org2.netbuild.hu","peer1.org2.netbuild.hu"],
+			"signedCert": {
+				"path": "/tmp/crypto/peerOrganizations/org2.netbuild.hu/users/Admin@org2.netbuild.hu/msp/signcerts/Admin@org2.netbuild.hu-cert.pem"
+			}
+		},
+		"Org3MSP": {
+			"mspid": "Org3MSP",
+			"adminPrivateKey": {
+				"path": "/tmp/crypto/peerOrganizations/org3.netbuild.hu/users/Admin@org3.netbuild.hu/msp/keystore/priv_sk"
+			},
+			"peers": ["peer0.org3.netbuild.hu","peer1.org3.netbuild.hu"],
+			"signedCert": {
+				"path": "/tmp/crypto/peerOrganizations/org3.netbuild.hu/users/Admin@org3.netbuild.hu/msp/signcerts/Admin@org3.netbuild.hu-cert.pem"
+			}
+		}               
+	},
+	"peers": {
+		"peer0.org1.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org1.netbuild.hu/peers/peer0.org1.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer0.org1.netbuild.hu:7051"
+		},
+		"peer1.org1.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer1.org1.netbuild.hu:7051"
+		},
+		"peer0.org2.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer0.org2.netbuild.hu:7051"
+		},
+		"peer1.org2.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org2.netbuild.hu/peers/peer1.org2.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer1.org2.netbuild.hu:7051"
+		},
+		"peer0.org3.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org3.netbuild.hu/peers/peer0.org3.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer0.org3.netbuild.hu:7051"
+		},
+		"peer1.org3.netbuild.hu": {
+			"tlsCACerts": {
+				"path": "/tmp/crypto/peerOrganizations/org3.netbuild.hu/peers/peer1.org3.netbuild.hu/tls/ca.crt"
+			},
+			"url": "grpcs://peer1.org3.netbuild.hu:7051"
+		}        
+	}
+}
