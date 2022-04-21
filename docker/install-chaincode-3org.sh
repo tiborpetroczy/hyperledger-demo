@@ -101,6 +101,7 @@ docker exec -e CORE_PEER_ADDRESS=peer1.org3.netbuild.hu:7051 \
     peer lifecycle chaincode queryinstalled
 '
 
+sleep 30
 
 docker exec cli bash -c '
 peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA --channelID demochannel --name sacc \
@@ -113,18 +114,16 @@ peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA
 -c "{\"function\":\"set\",\"args\":[\"key1\",\"$RANDOM\"]}" --waitForEvent
 '
 
-sleep 30
+# SAMPLE QUERY 
+# docker exec cli bash -c '
+# peer chaincode query --channelID demochannel --name sacc \
+# --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
+# -c "{\"function\":\"get\",\"args\":[\"key1\"]}"
+# '
 
-docker exec cli bash -c '
-peer chaincode query --channelID demochannel --name sacc \
---peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
--c "{\"function\":\"get\",\"args\":[\"key1\"]}"
-'
-
-exit
-
-peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA -C demochannel -n sacc \
---peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
---peerAddresses peer1.org1.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt \
---peerAddresses peer0.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt \
--c '{"function":"set","args":["car1","merci"]}' --waitForEvent
+# SAMPLE INVOKE
+# peer chaincode invoke -o orderer.netbuild.hu:7050 --tls --cafile $ORDERER_TLS_CA -C demochannel -n sacc \
+# --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE \
+# --peerAddresses peer1.org1.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.netbuild.hu/peers/peer1.org1.netbuild.hu/tls/ca.crt \
+# --peerAddresses peer0.org2.netbuild.hu:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.netbuild.hu/peers/peer0.org2.netbuild.hu/tls/ca.crt \
+# -c '{"function":"set","args":["car1","merci"]}' --waitForEvent

@@ -27,7 +27,7 @@ services:
       - COUCHDB_USER=org1peer1
       - COUCHDB_PASSWORD=password
     ports:
-      - 6984:5984
+      - "0.0.0.0:6984:5984"
     networks:
       - basic
 
@@ -38,7 +38,7 @@ services:
       - COUCHDB_USER=org2peer0
       - COUCHDB_PASSWORD=password
     ports:
-      - 7984:5984
+      - "0.0.0.0:7984:5984"
     networks:
       - basic
 
@@ -49,7 +49,7 @@ services:
       - COUCHDB_USER=org2peer1
       - COUCHDB_PASSWORD=password
     ports:
-      - 8984:5984
+      - "0.0.0.0:8984:5984"
     networks:
       - basic
 
@@ -60,7 +60,7 @@ services:
       - COUCHDB_USER=org3peer0
       - COUCHDB_PASSWORD=password
     ports:
-      - 9984:5984
+      - "0.0.0.0:9984:5984"
     networks:
       - basic
 
@@ -71,7 +71,7 @@ services:
       - COUCHDB_USER=org3peer1
       - COUCHDB_PASSWORD=password
     ports:
-      - 10984:5984
+      - "0.0.0.0:10984:5984"
     networks:
       - basic
 
@@ -147,8 +147,8 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
-      - 7050:7050
-      - 8443:8443
+      - "0.0.0.0:7050:7050"
+      - "0.0.0.0:8443:8443"
     volumes:
       - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer.netbuild.hu/msp:/var/hyperledger/orderer/msp
@@ -180,8 +180,8 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
-      - 8050:7050
-      - 9443:8443
+      - "0.0.0.0:8050:7050"
+      - "0.0.0.0:9443:8443"
     volumes:
       - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer2.netbuild.hu/msp:/var/hyperledger/orderer/msp
@@ -213,8 +213,8 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
-      - 9050:7050
-      - 10443:8443
+      - "0.0.0.0:9050:7050"
+      - "0.0.0.0:10443:8443"
     volumes:
       - ./config/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ./crypto-config/ordererOrganizations/netbuild.hu/orderers/orderer3.netbuild.hu/msp:/var/hyperledger/orderer/msp
@@ -450,6 +450,7 @@ services:
       - ../fabric-samples/chaincode/:/opt/gopath/src/github.com/chaincode
       - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
       - ./config:/etc/hyperledger/configtx
+      - ../loadtest/:/loadtest
     networks:
         - basic
     depends_on:
@@ -458,7 +459,8 @@ services:
       - orderer3.netbuild.hu
       - peer0.org1.netbuild.hu
       - peer0.org2.netbuild.hu
-  
+      - peer0.org3.netbuild.hu
+
   explorer:
     image: hyperledger/explorer:$EXPLORER_IMAGE_TAG
     container_name: explorer
@@ -478,7 +480,9 @@ services:
       - ./explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile/
       - ./crypto-config/:/tmp/crypto/
     ports:
-      - 8080:8080
+      - "0.0.0.0:8080:8080"
+    depends_on:
+      - explorerdb
     networks:
       - basic
   
@@ -507,7 +511,7 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
     ports:
-      - 9090:9090
+      - "0.0.0.0:9090:9090"
     networks:
       - basic
   
